@@ -4,105 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jarvis IA</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f0f0f0;
-            color: #333;
+            transition: background 0.5s, color 0.5s;
         }
-        #app {
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-            background: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        .dark {
+            background-color: #2D3748;
+            color: # White;
         }
-        .theme-switch {
-            margin-bottom: 20px;
+        .light {
+            background-color: #FFFFFF;
+            color: #000000;
         }
-        canvas {
-            border: 1px solid #ccc;
-            margin-top: 20px;
+        #chat {
+            max-height: 500px;
+            overflow-y: scroll;
         }
     </style>
 </head>
-<body>
-    <div id="app">
-        <h1>Jarvis IA Application</h1>
-        <div class="theme-switch">
-            <label for="theme">Theme: </label>
-            <select id="theme" onchange="switchTheme()">
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-            </select>
+<body class="light">
+    <div class="container mx-auto p-5">
+        <h1 class="text-2xl font-bold">Jarvis AI Application</h1>
+        <div class="mt-5">
+            <button id="themeToggle" class="bg-blue-500 text-white p-2 rounded">Toggle Dark/Light Theme</button>
         </div>
         <div>
-            <button onclick="startChat()">Chat Mode</button>
-            <button onclick="startCanvas()">Canvas Mode</button>
-        </div>
-        <div id="chat" style="display:none;">
-            <h2>Chat Mode</h2>
-            <input type="text" id="userInput" placeholder="Type your message...">
-            <button onclick="sendMessage()">Send</button>
-            <div id="chatOutput"></div>
-        </div>
-        <div id="canvasContainer" style="display:none;">
-            <h2>Canvas Mode</h2>
-            <canvas id="myCanvas" width="600" height="400"></canvas>
-            <button onclick="generateCode()">Generate Code</button>
-            <div id="codeOutput"></div>
+            <div id="chat" class="border border-gray-300 rounded-lg p-5 mt-3"></div>
+            <textarea id="userInput" class="border border-gray-300 rounded-lg p-2 mt-3 w-full" rows="3" placeholder="Type your message..."></textarea>
+            <button id="sendMessage" class="bg-green-500 text-white p-2 rounded mt-3">Send</button>
         </div>
     </div>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+        const chat = document.getElementById('chat');
+        const userInput = document.getElementById('userInput');
+        const sendMessage = document.getElementById('sendMessage');
+        const themeToggle = document.getElementById('themeToggle');
+        let isDark = false;
+
+        function appendMessage(sender, message) {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = sender + ': ' + message;
+            chat.appendChild(messageElement);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        sendMessage.addEventListener('click', () => {
+            const userMessage = userInput.value;
+            appendMessage('User', userMessage);
+            userInput.value = '';
+            // Simulating AI response
+            setTimeout(() => {
+                appendMessage('Jarvis', 'This is a simulated response.');
+            }, 1000);
+        });
+
+        themeToggle.addEventListener('click', () => {
+            isDark = !isDark;
+            document.body.className = isDark ? 'dark' : 'light';
+        });
+
+        // Voice recognition setup
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            userInput.value = transcript;
+            recognition.stop();
+            sendMessage.click();
         };
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
 
-        function startChat() {
-            document.getElementById('chat').style.display = 'block';
-            document.getElementById('canvasContainer').style.display = 'none';
-        }
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage.click();
+            }
+        });
 
-        function startCanvas() {
-            document.getElementById('canvasContainer').style.display = 'block';
-            document.getElementById('chat').style.display = 'none';
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('userInput').value;
-            document.getElementById('chatOutput').innerHTML += '<div>' + input + '</div>';
-            document.getElementById('userInput').value = '';
-            // Here you can integrate voice recognition and Firebase functionality
-        }
-
-        function generateCode() {
-            const canvas = document.getElementById('myCanvas');
-            const context = canvas.getContext('2d');
-            context.fillStyle = '#FF0000';
-            context.fillRect(0, 0, 150, 75);
-            document.getElementById('codeOutput').innerHTML = '<pre>Code generated!</pre>';
-            // Here you can add code generation logic
-        }
-
-        function switchTheme() {
-            const theme = document.getElementById('theme').value;
-            document.body.style.background = theme === 'dark' ? '#333' : '#f0f0f0';
-            document.body.style.color = theme === 'dark' ? '#f0f0f0' : '#333';
-        }
+        // Start voice recognition
+        recognition.start();
     </script>
 </body>
 </html>
