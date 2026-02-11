@@ -3,63 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4A4A4A">
     <title>Jarvis IA Application</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        body { transition: background-color 0.5s, color 0.5s; }
-        .dark-theme { background-color: #1a202c; color: #cbd5e0; }
-        .light-theme { background-color: #f7fafc; color: #2d3748; }
-        canvas { border: 1px solid #ccc; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
 </head>
-<body class="light-theme">
-    <div class="container mx-auto p-4">
-        <h1 class="text-3xl font-bold text-center">Jarvis IA Application</h1>
-        <button id="theme-toggle" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Toggle Theme</button>
-        <div class="mt-4">
-            <canvas id="drawingCanvas" width="400" height="400" class="bg-gray-200"></canvas>
-        </div>
-        <div class="flex flex-col mt-4">
-            <textarea id="inputText" class="p-2 border rounded" rows="3" placeholder="Type your command..."></textarea>
-            <button id="sendCommand" class="mt-2 px-4 py-2 bg-green-500 text-white rounded">Send Command</button>
-        </div>
-        <div id="responseArea" class="mt-4 p-4 border rounded bg-white shadow-md"></div>
+<body>
+    <div id="app">
+        <header>
+            <h1>Jarvis IA</h1>
+            <button id="theme-toggle">Toggle Theme</button>
+            <nav>
+                <button id="canvas-mode">Canvas Mode</button>
+                <button id="chat-mode">Chat Mode</button>
+            </nav>
+        </header>
+        <main>
+            <section id="canvas-container" class="mode">
+                <canvas id="canvas"></canvas>
+            </section>
+            <section id="chat-container" class="mode hidden">
+                <div id="chat-log"></div>
+                <input type="text" id="user-input" placeholder="Type your message...">
+                <button id="send-message">Send</button>
+            </section>
+        </main>
     </div>
+    <footer>
+        <p>&copy; 2026 Jarvis IA Application</p>
+    </footer>
     <script>
-        const canvas = document.getElementById('drawingCanvas');
-        const ctx = canvas.getContext('2d');
-        let drawing = false;
-
-        canvas.addEventListener('mousedown', () => { drawing = true; });
-        canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
-        canvas.addEventListener('mousemove', draw);
-
-        function draw(event) {
-            if (!drawing) return;
-            ctx.lineWidth = 5;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#000';
-            ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
-        }
-
-        document.getElementById('sendCommand').addEventListener('click', function() {
-            const command = document.getElementById('inputText').value;
-            // Placeholder for AI integration with Google Gemini
-            // Replace with actual API call and handle the response
-            document.getElementById('responseArea').innerText = 'Response from AI: ' + command;
-            // Implement Text-to-Speech
-            const utterance = new SpeechSynthesisUtterance(command);
-            window.speechSynthesis.speak(utterance);
+        // Theme toggle logic
+        const themeToggle = document.getElementById('theme-toggle');
+        const app = document.getElementById('app');
+        themeToggle.addEventListener('click', () => {
+            app.classList.toggle('dark-theme');
         });
 
-        document.getElementById('theme-toggle').addEventListener('click', function() {
-            document.body.classList.toggle('dark-theme');
-            document.body.classList.toggle('light-theme');
+        // Mode switching logic
+        const canvasModeButton = document.getElementById('canvas-mode');
+        const chatModeButton = document.getElementById('chat-mode');
+        const canvasContainer = document.getElementById('canvas-container');
+        const chatContainer = document.getElementById('chat-container');
+
+        canvasModeButton.addEventListener('click', () => {
+            canvasContainer.classList.remove('hidden');
+            chatContainer.classList.add('hidden');
+        });
+
+        chatModeButton.addEventListener('click', () => {
+            chatContainer.classList.remove('hidden');
+            canvasContainer.classList.add('hidden');
+        });
+
+        // Voice recognition setup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('user-input').value = transcript;
+            };
+
+            const sendButton = document.getElementById('send-message');
+            sendButton.addEventListener('click', () => {
+                recognition.start();
+            });
+        }
+
+        // Chat functionality
+        const chatLog = document.getElementById('chat-log');
+        const userInput = document.getElementById('user-input');
+
+        document.getElementById('send-message').addEventListener('click', () => {
+            const userMessage = userInput.value;
+            chatLog.innerHTML += `<p>User: ${userMessage}</p>`;
+            userInput.value = '';
+
+            // Placeholder for AI response
+            chatLog.innerHTML += `<p>Jarvis: (AI response goes here)</p>`;
         });
     </script>
 </body>
