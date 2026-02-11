@@ -3,85 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jarvis IA</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Jarvis IA Application</title>
     <style>
         body {
-            transition: background 0.5s, color 0.5s;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
-        .dark {
-            background-color: #2D3748;
-            color: # White;
+        canvas {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            width: 90%;
+            height: 80%;
         }
-        .light {
-            background-color: #FFFFFF;
-            color: #000000;
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
-        #chat {
-            max-height: 500px;
-            overflow-y: scroll;
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
-<body class="light">
-    <div class="container mx-auto p-5">
-        <h1 class="text-2xl font-bold">Jarvis AI Application</h1>
-        <div class="mt-5">
-            <button id="themeToggle" class="bg-blue-500 text-white p-2 rounded">Toggle Dark/Light Theme</button>
-        </div>
-        <div>
-            <div id="chat" class="border border-gray-300 rounded-lg p-5 mt-3"></div>
-            <textarea id="userInput" class="border border-gray-300 rounded-lg p-2 mt-3 w-full" rows="3" placeholder="Type your message..."></textarea>
-            <button id="sendMessage" class="bg-green-500 text-white p-2 rounded mt-3">Send</button>
-        </div>
-    </div>
+<body>
+    <h1>Welcome to the Jarvis IA Application</h1>
+    <canvas id="drawingCanvas"></canvas>
+    <button id="integrateAI">Integrate AI</button>
     <script>
-        const chat = document.getElementById('chat');
-        const userInput = document.getElementById('userInput');
-        const sendMessage = document.getElementById('sendMessage');
-        const themeToggle = document.getElementById('themeToggle');
-        let isDark = false;
+        const canvas = document.getElementById('drawingCanvas');
+        const context = canvas.getContext('2d');
+        canvas.width = window.innerWidth * 0.9;
+        canvas.height = window.innerHeight * 0.8;
 
-        function appendMessage(sender, message) {
-            const messageElement = document.createElement('div');
-            messageElement.textContent = sender + ': ' + message;
-            chat.appendChild(messageElement);
-            chat.scrollTop = chat.scrollHeight;
+        let drawing = false;
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mousemove', draw);
+
+        function startDrawing(event) {
+            drawing = true;
+            draw(event);
         }
 
-        sendMessage.addEventListener('click', () => {
-            const userMessage = userInput.value;
-            appendMessage('User', userMessage);
-            userInput.value = '';
-            // Simulating AI response
-            setTimeout(() => {
-                appendMessage('Jarvis', 'This is a simulated response.');
-            }, 1000);
+        function stopDrawing() {
+            drawing = false;
+            context.beginPath();
+        }
+
+        function draw(event) {
+            if (!drawing) return;
+            context.lineWidth = 5;
+            context.lineCap = 'round';
+            context.strokeStyle = '#000';
+
+            context.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            context.stroke();
+            context.beginPath();
+            context.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+        }
+
+        document.getElementById('integrateAI').addEventListener('click', function() {
+            alert('AI Integration is not yet implemented.');
         });
-
-        themeToggle.addEventListener('click', () => {
-            isDark = !isDark;
-            document.body.className = isDark ? 'dark' : 'light';
-        });
-
-        // Voice recognition setup
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            userInput.value = transcript;
-            recognition.stop();
-            sendMessage.click();
-        };
-
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage.click();
-            }
-        });
-
-        // Start voice recognition
-        recognition.start();
     </script>
 </body>
 </html>
